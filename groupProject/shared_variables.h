@@ -54,6 +54,12 @@ typedef enum {
 extern OperationMode currentMode;
 extern bool pingRequested;
 
+typedef enum {
+  READY,
+  ACTIVE_LISTENING,
+  ACTIVE_DETECTED,
+  QUIESCENT
+} SensorState;
 
 /*** DO NOT PLACE ANY CODE BELOW THIS LINE! ***/
 

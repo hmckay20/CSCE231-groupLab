@@ -22,6 +22,7 @@
 #include "sensor.h"
 #include "shared_variables.h"
 
+volatile SensorState  = READY;
 const int trigPin = 2;
 const int echoPin = 3;
 volatile unsigned long pulseStartTime = 0;
@@ -61,6 +62,14 @@ void manage_sensor(void) {
 
 ISR(TIMER1_OVF_vect){
 
+if(sensorState == ACTIVE_LISTENING){
+  objectDetected = false;
+  objectDistance = 0;
+
+  sensorState = QUIESCENT;
+
+  TCNT1 = 0;
+}
 }
 
 void echoPin_ISR(){
