@@ -52,6 +52,7 @@ void manage_controls(void) {
     if (currentMode == SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH){
       pingRequested = true;
     }
+    
   }
  
 
