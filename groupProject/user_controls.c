@@ -56,8 +56,8 @@ pingRequested = false;
 
 void manage_controls(void) 
 {
-  bool switch1State = debounceRead(11);
-  bool switch2State = debounceRead(12);
+  bool switch1State = debounceRead(10);
+  bool switch2State = debounceRead(11);
 
   // if (switch1State == LOW && switch2State == LOW) 
   // {
