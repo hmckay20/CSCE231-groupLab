@@ -28,18 +28,21 @@ volatile unsigned long pulseStartTime = 0;
 volatile unsigned long pulseEndTime = 0;
 volatile bool objectDetected = false;
 volatile long objectDistance = 0;
+volatile uint8_t supplemental_counter = 0;
+volatile cowpi_timer16bit_t *timer = (cowpi_timer16bit_t *)(0x80);
+
+
 
 void initialize_sensor(void) {
-
-pinMode(trigPin, OUTPUT);
-pinMode(echoPin, INPUT);
-noInterrupts();
-TCCR1A = 0;
-TCCR1B = 0;
-TCNT1 = 0;
-TCCR1B |= (1 << CS11);
-TIMSK1 |= (1 << TOIE1);
-interrupts();
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  noInterrupts();
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
+  TCCR1B |= (1 << CS10) | (1 << CS11) | (1 << CS12);
+  TIMSK1 |= (1 << TOIE1);
+  interrupts();
 }
 
 void manage_sensor(void) {
@@ -60,14 +63,22 @@ void manage_sensor(void) {
 }
 
 ISR(TIMER1_OVF_vect){
-
 if(sensorState == ACTIVE_LISTENING){
+  
   objectDetected = false;
   objectDistance = 0;
 
   sensorState = QUIESCENT;
 
   TCNT1 = 0;
+}
+if (sensorState == ACTIVE_DETECTED){
+  objectDetected = true;
+  sensorState = QUIESCENT;
+}
+if (sensorState == QUIESCENT)
+{
+  sensorState = READY;
 }
 }
 
