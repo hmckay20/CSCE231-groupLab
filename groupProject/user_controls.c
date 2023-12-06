@@ -27,7 +27,24 @@ OperationMode currentMode = NORMAL;
 bool pingRequested = false;
 const int pushButtonPin = 9;
 
+int buttonState = 0;
+int lastButtonState = 0; 
+int currentButtonState = 0; 
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50;; 
+bool debounceRead(int pin){
 
+   currentButtonState = digitalRead(pin);
+
+  if(currentButtonState != lastButtonState){
+    lastDebounceTime = millis();
+  }
+  if((millis() - lastDebounceTime ) > debounceDelay ){
+    buttonState = currentButtonState;
+  }
+  lastButtonState = currentButtonState;
+  return lastButtonState;
+}
 void initialize_controls(void) 
 {
 
@@ -39,28 +56,36 @@ pingRequested = false;
 
 void manage_controls(void) 
 {
-  bool switch1State = digitalRead(switchPin1);
-  bool switch2State = digitalRead(switchPin2);
+  bool switch1State = debounceRead(10);
+  bool switch2State = debounceRead(11);
 
-  if (switch1State == LOW && switch2State == LOW) 
-  {
-    currentMode = NORMAL;
-  } 
-  else if (switch1State == HIGH && switch2State == LOW) 
-  {
-    currentMode = SINGLE_PULSE;
-  } 
-  else if (switch1State == HIGH && switch2State == HIGH) 
-  {
-    currentMode = THRESHOLD_ADJUSTMENT;
-  } 
-  else if (switch1State == LOW && switch2State == HIGH) 
-  {
-    currentMode = CONTINUOUS_TONE;
-  }
+  // if (switch1State == LOW && switch2State == LOW) 
+  // {
+  //   currentMode = NORMAL;
+  //     //  manage_alarm();
+  // } 
+  // else if (switch1State == HIGH && switch2State == LOW) 
+  // {
+  //   currentMode = SINGLE_PULSE;
+  //     //  manage_alarm();
+  // } 
+  // else if (switch1State == HIGH && switch2State == HIGH) 
+  // {
+  //   currentMode = THRESHOLD_ADJUSTMENT;
+  //     //  manage_alarm();
+  // } 
+  // else if (switch1State == LOW && switch2State == HIGH) 
+  // {
+  //   currentMode = CONTINUOUS_TONE;
 
-  if (currentMode == SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH)
-  {
-      pingRequested = true;
-  }
+  //  // manage_alarm();
+  // }
+
+  // if (currentMode == SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH)
+  // {
+  //     pingRequested = true;
+  // }
+
+currentMode = SINGLE_PULSE;
+
 }

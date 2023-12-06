@@ -55,7 +55,9 @@ extern FILE *display;
 
 extern OperationMode currentMode;
 extern bool pingRequested;
-
+extern volatile long objectDistance; // The distance to the detected object
+extern volatile long threshold_distance; // The threshold distance for triggering the alarm
+volatile bool objectDetected;
 
 /*** DO NOT PLACE ANY CODE BELOW THIS LINE! ***/
 

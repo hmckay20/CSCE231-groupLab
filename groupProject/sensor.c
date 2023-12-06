@@ -33,6 +33,16 @@ volatile cowpi_timer16bit_t *timer = (cowpi_timer16bit_t *)(0x80);
 
 
 
+void echoPin_ISR(){
+if(digitalRead(echoPin) == HIGH){
+  pulseStartTime = micros();
+}else{
+  pulseEndTime = micros();
+  objectDetected = true;
+  sensorState = ACTIVE_DETECTED;
+}
+}
+
 void initialize_sensor(void) {
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
@@ -43,29 +53,45 @@ void initialize_sensor(void) {
   TCCR1B |= (1 << CS10) | (1 << CS11) | (1 << CS12);
   TIMSK1 |= (1 << TOIE1);
   interrupts();
+
+pinMode(trigPin, OUTPUT);
+pinMode(echoPin, INPUT);
+noInterrupts();
+TCCR1A = 0;
+TCCR1B = 0;
+TCNT1 = 0;
+ TCCR1B |= (1 << CS10) | (1 << CS11) | (1 << CS12);
+  TIMSK1 |= (1 << TOIE1);
+interrupts();
+attachInterrupt(digitalPinToInterrupt(3), echoPin_ISR, CHANGE);
+
 }
 
 void manage_sensor(void) {
 
-  if(pingRequested){
+  if(sensorState == READY && pingRequested){
     digitalWrite(trigPin, HIGH);
     delayMicroseconds(10);
     digitalWrite(trigPin, LOW);
   
     pingRequested = false;
+    sensorState = ACTIVE_LISTENING;
   }
   if (objectDetected){
     long timeElapsed = pulseEndTime - pulseStartTime;
     objectDistance = timeElapsed * 0.034 / 2;
-    objectDetected = false;
+   // objectDetected = false;
+      printf("Distance:\n");
+  printf("%ld\n", objectDistance);
+  sensorState = QUIESCENT;
   }
-
 }
 
 ISR(TIMER1_OVF_vect){
 if(sensorState == ACTIVE_LISTENING){
   
   objectDetected = false;
+ // objectDetected = false;
   objectDistance = 0;
 
   sensorState = QUIESCENT;
@@ -78,15 +104,14 @@ if (sensorState == ACTIVE_DETECTED){
 }
 if (sensorState == QUIESCENT)
 {
+
+if(sensorState == ACTIVE_DETECTED){
+  objectDetected = true;
+  sensorState = QUIESCENT;
+}
+if(sensorState == QUIESCENT){
   sensorState = READY;
 }
 }
 
-void echoPin_ISR(){
-if(digitalRead(echoPin) == HIGH){
-  pulseStartTime = micros();
-}else{
-  pulseEndTime = micros();
-  objectDetected = true;
-}
-}
+

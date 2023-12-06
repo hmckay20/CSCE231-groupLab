@@ -20,9 +20,9 @@
 #include <stdio.h>
 #include "alarm.h"
 #include "shared_variables.h"
+volatile long threshold_distance = 400;
 
-
-const unsigned int on_period = 7000;    // 50ms ÷ 100μs //add code to illuminate both LEDs for the same 50ms that the piezodisc generates
+const unsigned int on_period = 500;    // 50ms ÷ 100μs //add code to illuminate both LEDs for the same 50ms that the piezodisc generates
                                         // a tone and then deluminates the LEDs just as the tone is silenced
 
 volatile unsigned int total_period = 50000;
@@ -33,11 +33,19 @@ bool alarm_requested = false;
 
 void initialize_alarm(void) 
 {
+volatile unsigned int total_period = 500;
+int counter = 0;
+volatile bool alarmActive = false; 
+void initialize_alarm(void) 
+{
+  pinMode(13, OUTPUT);
+   // bool alarm_requested = false;
+
     noInterrupts();
     TCCR2A = 0;
     TCCR2B = 0;
     TCNT2 = 0;
-    OCR2A = 156; // (adjust as needed)
+    OCR2A = 24; // (adjust as needed)
     TCCR2A |= (1 << WGM21); // Set to ctc mode
     TCCR2B |= (1 << CS22) | (1 << CS21); // Set prescaler to 256
     TIMSK2 |= (1 << OCIE2A); // Enable compare match interrupt
@@ -60,44 +68,48 @@ void manage_alarm(void)
             pingRequested = false; 
             counter = 0;  
         }
+
+    switch(currentMode) {
+     case NORMAL: 
+      break;
+     
+     
+     case SINGLE_PULSE:
+   
+        if (objectDetected && objectDistance < threshold_distance) {
+        //  printf("case one\n");
+               alarmActive = true;
+               counter = 0;
+               //pingRequested = false;
+               objectDetected = false;
+      } else if( objectDetected && objectDistance > threshold_distance){
+              alarmActive = false;
+              counter = 0; 
+              objectDetected = false;
+              digitalWrite(12, HIGH);
+              delay(500);
+      }
+
+      if (counter >= on_period) {
+                alarmActive = false;
+                digitalWrite(12, LOW);
+             
+            }
+      break;
+
+      case THRESHOLD_ADJUSTMENT:
+          alarmActive = false;
+      break;
+
+      case CONTINUOUS_TONE:
+          alarmActive = true;
+   
+      break;
+
     }
-
-    if (pingRequested) 
-    {
-        alarm_requested = true;
-        counter = 0;
-        pingRequested = false;
-    }
-  
-    // if (millis() % total_period < on_period) 
-    // {
-    //     activate_alarm();
-    // } 
-    // else 
-    // {
-    //     deactivate_alarm();
-    // }
-    // if ( (OperationMode == NORMAL) && (counter == total_period) )
-    // {
-    //   bool alarm_requested = true;
-    //   counter = 0;
-
-    // }
-
-
+   
 }
 
-
-// void activate_alarm(void) 
-// {
-//     //activate alarm 
-//     tone(piezoPin, 5000);
-// }
-
-// void deactivate_alarm(void) 
-// {
-//     //deactivate alarm
-// }
 
 ISR(TIMER2_COMPA_vect) 
 {
@@ -106,16 +118,26 @@ ISR(TIMER2_COMPA_vect)
     // Test that your code is generating a tone on the piezodisc, and correct any errors.
 
     static bool toggle = false;
-    counter++; 
 
+if(alarmActive){
+ // printf("alarm active\n");
     if (toggle) 
     {
         digitalWrite(13, HIGH);
+        digitalWrite(12, HIGH);
     } 
     else 
     {
         digitalWrite(13, LOW);
+        digitalWrite(12, HIGH);
     }
-
     toggle = !toggle;
+
+} else{
+  
+  digitalWrite(13, LOW);
+
+}
+counter++;
+//printf("%d", counter);
 }
