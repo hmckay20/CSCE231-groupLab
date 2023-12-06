@@ -32,14 +32,14 @@ volatile long objectDistance = 0;
 void initialize_sensor(void) {
 
 pinMode(trigPin, OUTPUT);
-pinMode(echoPin, INPUT);
-noInterrupts();
-TCCR1A = 0;
-TCCR1B = 0;
-TCNT1 = 0;
-TCCR1B |= (1 << CS11);
-TIMSK1 |= (1 << TOIE1);
-interrupts();
+  pinMode(echoPin, INPUT);
+  noInterrupts();
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
+  TCCR1B |= (1 << CS10) | (1 << CS11) | (1 << CS12);
+  TIMSK1 |= (1 << TOIE1);
+  interrupts();
 }
 
 void manage_sensor(void) {
@@ -60,14 +60,20 @@ void manage_sensor(void) {
 }
 
 ISR(TIMER1_OVF_vect){
-
+  
 if(sensorState == ACTIVE_LISTENING){
+  
   objectDetected = false;
   objectDistance = 0;
 
   sensorState = QUIESCENT;
 
   TCNT1 = 0;
+}
+  
+if (sensorState == ACTIVE_DETECTED){
+  objectDetected = true;
+  sensorState = QUIESCENT;
 }
 }
 
