@@ -27,10 +27,12 @@ const unsigned int on_period = 7000;    // 50ms ÷ 100μs //add code to illumina
 
 volatile unsigned int total_period = 50000;
 
+
+int counter = 0; //variable that counts the number of times the ISR has been triggered since the start of an alarm.
+bool alarm_requested = false;
+
 void initialize_alarm(void) 
 {
-    bool alarm_requested = false;
-
     noInterrupts();
     TCCR2A = 0;
     TCCR2B = 0;
@@ -45,18 +47,16 @@ void initialize_alarm(void)
 
 void manage_alarm(void) 
 {
-    int counter = 0; //variable that counts the number of times the ISR has been triggered since the start of an alarm.
-    
     if (millis() % total_period < on_period) 
     {
-        if (pingRequested && counter < on_period) 
+        if (pingRequested && alarm_requested && (counter < on_period)) 
         {
             //activate_alarm(); 
-            tone(piezoPin, 5000); //what the pin is the piezo on? or should it be alarm 
+            pinMode(13, OUTPUT); //what the pin is the piezo on? or should it be alarm 
             counter++;    
         } else {
             //deactivate_alarm();  
-            noTonetone(piezoPin); //makes no sense but how do I turn alarm off 
+            alarm_requested = false;
             pingRequested = false; 
             counter = 0;  
         }
