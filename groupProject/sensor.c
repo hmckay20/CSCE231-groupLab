@@ -2,8 +2,7 @@
  *
  * @file sensor.c
  *
- * @author (STUDENTS -- TYPE YOUR NAMES HERE)
- * @author (STUDENTS -- TYPE YOUR NAMES HERE)
+ * @author Teighan Peterson, Erin Hughey, Hunter Mcay
  *
  * @brief Code to manage the distance sensor.
  *
