@@ -52,40 +52,34 @@ pinMode(switchPin1, INPUT);
 pinMode(switchPin2, INPUT);
 pinMode(pushButtonPin, INPUT);
 pingRequested = false;
+
 }
 
 void manage_controls(void) 
 {
-  bool switch1State = debounceRead(10);
-  bool switch2State = debounceRead(11);
+  bool switch1State = debounceRead(11);
+  bool switch2State = debounceRead(12);
 
-  // if (switch1State == LOW && switch2State == LOW) 
-  // {
-  //   currentMode = NORMAL;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == HIGH && switch2State == LOW) 
-  // {
-  //   currentMode = SINGLE_PULSE;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == HIGH && switch2State == HIGH) 
-  // {
-  //   currentMode = THRESHOLD_ADJUSTMENT;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == LOW && switch2State == HIGH) 
-  // {
-  //   currentMode = CONTINUOUS_TONE;
+  if ((cowpi_left_switch_is_in_left_position()) && (cowpi_right_switch_is_in_left_position())) //left to left 
+  {
+      currentMode = NORMAL;
+  } 
+  else if ((cowpi_left_switch_is_in_right_position()) && (cowpi_right_switch_is_in_left_position())) //right left
+  {
+    currentMode = SINGLE_PULSE;
+      if (currentMode == (SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH))
+      {
+      pingRequested = true;
+      }
 
-  //  // manage_alarm();
-  // }
-
-  // if (currentMode == SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH)
-  // {
-  //     pingRequested = true;
-  // }
-
-currentMode = SINGLE_PULSE;
+  } 
+  else if ((cowpi_left_switch_is_in_right_position()) && (cowpi_right_switch_is_in_right_position())) //right right
+  {
+    currentMode = THRESHOLD_ADJUSTMENT;
+  } 
+  else if ((cowpi_left_switch_is_in_left_position()) && (cowpi_right_switch_is_in_right_position())) //left right  
+  {
+    currentMode = CONTINUOUS_TONE;
+  }
 
 }
