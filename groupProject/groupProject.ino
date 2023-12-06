@@ -57,6 +57,7 @@ void setup() {
 }
 
 void loop() {
+
     manage_controls();
     manage_sensor();
     manage_alarm();

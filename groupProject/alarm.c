@@ -20,22 +20,24 @@
 #include <stdio.h>
 #include "alarm.h"
 #include "shared_variables.h"
+volatile long threshold_distance = 0;
 
-
-const unsigned int on_period = 7000;    // 50ms ÷ 100μs //add code to illuminate both LEDs for the same 50ms that the piezodisc generates
+const unsigned int on_period = 500;    // 50ms ÷ 100μs //add code to illuminate both LEDs for the same 50ms that the piezodisc generates
                                         // a tone and then deluminates the LEDs just as the tone is silenced
 
-volatile unsigned int total_period = 50000;
-
+volatile unsigned int total_period = 500;
+int counter = 0;
+volatile bool alarmActive = false; 
 void initialize_alarm(void) 
 {
-    bool alarm_requested = false;
+  pinMode(13, OUTPUT);
+   // bool alarm_requested = false;
 
     noInterrupts();
     TCCR2A = 0;
     TCCR2B = 0;
     TCNT2 = 0;
-    OCR2A = 156; // (adjust as needed)
+    OCR2A = 24; // (adjust as needed)
     TCCR2A |= (1 << WGM21); // Set to ctc mode
     TCCR2B |= (1 << CS22) | (1 << CS21); // Set prescaler to 256
     TIMSK2 |= (1 << OCIE2A); // Enable compare match interrupt
@@ -45,59 +47,37 @@ void initialize_alarm(void)
 
 void manage_alarm(void) 
 {
-    int counter = 0; //variable that counts the number of times the ISR has been triggered since the start of an alarm.
-    
-    if (millis() % total_period < on_period) 
-    {
-        if (pingRequested && counter < on_period) 
-        {
-            //activate_alarm(); 
-            tone(piezoPin, 5000); //what the pin is the piezo on? or should it be alarm 
-            counter++;    
-        } else {
-            //deactivate_alarm();  
-            noTonetone(piezoPin); //makes no sense but how do I turn alarm off 
-            pingRequested = false; 
-            counter = 0;  
-        }
+
+    switch(currentMode) {
+     case NORMAL: 
+      break;
+     
+     
+     case SINGLE_PULSE:
+        if (objectDetected) {
+               alarmActive = true;
+               counter = 0;
+               pingRequested = false;
+      }
+
+      if (counter >= on_period) {
+                alarmActive = false;
+            }
+      break;
+
+      case THRESHOLD_ADJUSTMENT:
+          alarmActive = false;
+      break;
+
+      case CONTINUOUS_TONE:
+          alarmActive = true;
+   
+      break;
+
     }
-
-    if (pingRequested) 
-    {
-        alarm_requested = true;
-        counter = 0;
-        pingRequested = false;
-    }
-  
-    // if (millis() % total_period < on_period) 
-    // {
-    //     activate_alarm();
-    // } 
-    // else 
-    // {
-    //     deactivate_alarm();
-    // }
-    // if ( (OperationMode == NORMAL) && (counter == total_period) )
-    // {
-    //   bool alarm_requested = true;
-    //   counter = 0;
-
-    // }
-
-
+   
 }
 
-
-// void activate_alarm(void) 
-// {
-//     //activate alarm 
-//     tone(piezoPin, 5000);
-// }
-
-// void deactivate_alarm(void) 
-// {
-//     //deactivate alarm
-// }
 
 ISR(TIMER2_COMPA_vect) 
 {
