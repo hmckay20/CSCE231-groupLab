@@ -60,6 +60,11 @@ void manage_controls(void)
   bool switch1State = debounceRead(11);
   bool switch2State = debounceRead(12);
 
+  if (cowpi_left_button_is_pressed())
+  {
+    pingRequested = true;
+  }
+
   if ((cowpi_left_switch_is_in_left_position()) && (cowpi_right_switch_is_in_left_position())) //left to left 
   {
       currentMode = NORMAL;
@@ -67,10 +72,7 @@ void manage_controls(void)
   else if ((cowpi_left_switch_is_in_right_position()) && (cowpi_right_switch_is_in_left_position())) //right left
   {
     currentMode = SINGLE_PULSE;
-      if (currentMode == (SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH))
-      {
-      pingRequested = true;
-      }
+
 
   } 
   else if ((cowpi_left_switch_is_in_right_position()) && (cowpi_right_switch_is_in_right_position())) //right right
