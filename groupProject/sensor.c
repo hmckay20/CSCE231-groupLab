@@ -67,7 +67,7 @@ void manage_sensor(void) {
   if (objectDetected){
     long timeElapsed = pulseEndTime - pulseStartTime;
     objectDistance = timeElapsed * 0.034 / 2;
-    objectDetected = false;
+   // objectDetected = false;
       printf("Distance:\n");
   printf("%ld\n", objectDistance);
   sensorState = QUIESCENT;
@@ -77,7 +77,7 @@ void manage_sensor(void) {
 ISR(TIMER1_OVF_vect){
 
 if(sensorState == ACTIVE_LISTENING){
-  objectDetected = false;
+ // objectDetected = false;
   objectDistance = 0;
 
   sensorState = QUIESCENT;

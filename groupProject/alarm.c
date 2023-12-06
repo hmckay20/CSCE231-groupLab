@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include "alarm.h"
 #include "shared_variables.h"
-volatile long threshold_distance = 0;
+volatile long threshold_distance = 400;
 
 const unsigned int on_period = 500;    // 50ms ÷ 100μs //add code to illuminate both LEDs for the same 50ms that the piezodisc generates
                                         // a tone and then deluminates the LEDs just as the tone is silenced
@@ -54,14 +54,25 @@ void manage_alarm(void)
      
      
      case SINGLE_PULSE:
-        if (objectDetected) {
+   
+        if (objectDetected && objectDistance < threshold_distance) {
+        //  printf("case one\n");
                alarmActive = true;
                counter = 0;
-               pingRequested = false;
+               //pingRequested = false;
+               objectDetected = false;
+      } else if( objectDetected && objectDistance > threshold_distance){
+              alarmActive = false;
+              counter = 0; 
+              objectDetected = false;
+              digitalWrite(12, HIGH);
+              delay(500);
       }
 
       if (counter >= on_period) {
                 alarmActive = false;
+                digitalWrite(12, LOW);
+             
             }
       break;
 
@@ -86,16 +97,26 @@ ISR(TIMER2_COMPA_vect)
     // Test that your code is generating a tone on the piezodisc, and correct any errors.
 
     static bool toggle = false;
-    counter++; 
 
+if(alarmActive){
+ // printf("alarm active\n");
     if (toggle) 
     {
         digitalWrite(13, HIGH);
+        digitalWrite(12, HIGH);
     } 
     else 
     {
         digitalWrite(13, LOW);
+        digitalWrite(12, HIGH);
     }
-
     toggle = !toggle;
+
+} else{
+  
+  digitalWrite(13, LOW);
+
+}
+counter++;
+//printf("%d", counter);
 }
