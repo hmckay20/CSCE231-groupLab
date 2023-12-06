@@ -2,8 +2,7 @@
  *
  * @file shared_variables.h
  *
- * @author (STUDENTS -- TYPE YOUR NAMES HERE)
- * @author (STUDENTS -- TYPE YOUR NAMES HERE)
+ * @author Teighan Peterson, Erin Hughey, Hunter Mcay
  *
  * @brief Types and variables that need to be shared among the .c files.
  *
@@ -29,9 +28,19 @@ extern "C" {
 
 /* IF YOU NEED TO DECLARE ANY ENUMS OR STRUCTS THAT
    ARE USED BY MORE THAN ONE .c FILE, PLACE THEM HERE */
+typedef enum {
+  NORMAL,
+  SINGLE_PULSE,
+  THRESHOLD_ADJUSTMENT,
+  CONTINUOUS_TONE
+}OperationMode;
 
-
-
+typedef enum {
+  READY,
+  ACTIVE_LISTENING,
+  ACTIVE_DETECTED,
+  QUIESCENT
+} SensorState;
 
 
 /* IF YOU NEED TO CREATE ANY GLOBAL VARIABLES
@@ -44,22 +53,9 @@ extern "C" {
 
 extern FILE *display;
 
-typedef enum {
-  NORMAL,
-  SINGLE_PULSE,
-  THRESHOLD_ADJUSTMENT,
-  CONTINUOUS_TONE
-}OperationMode;
-
 extern OperationMode currentMode;
 extern bool pingRequested;
 
-typedef enum {
-  READY,
-  ACTIVE_LISTENING,
-  ACTIVE_DETECTED,
-  QUIESCENT
-} SensorState;
 
 /*** DO NOT PLACE ANY CODE BELOW THIS LINE! ***/
 
