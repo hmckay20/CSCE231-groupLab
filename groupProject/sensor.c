@@ -22,7 +22,7 @@
 #include "sensor.h"
 #include "shared_variables.h"
 
-volatile SensorState  = READY;
+volatile SensorState sensorState = READY;
 const int trigPin = 2;
 const int echoPin = 3;
 volatile unsigned long pulseStartTime = 0;
