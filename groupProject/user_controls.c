@@ -32,60 +32,50 @@ int lastButtonState = 0;
 int currentButtonState = 0; 
 unsigned long lastDebounceTime = 0;
 unsigned long debounceDelay = 50;; 
-bool debounceRead(int pin){
 
-   currentButtonState = digitalRead(pin);
-
-  if(currentButtonState != lastButtonState){
-    lastDebounceTime = millis();
-  }
-  if((millis() - lastDebounceTime ) > debounceDelay ){
-    buttonState = currentButtonState;
-  }
-  lastButtonState = currentButtonState;
-  return lastButtonState;
-}
+volatile cowpi_ioport_t *ioports;   // an array of I/O ports
+volatile cowpi_i2c_t *i2c;   
 void initialize_controls(void) 
 {
 
-pinMode(switchPin1, INPUT);
-pinMode(switchPin2, INPUT);
-pinMode(pushButtonPin, INPUT);
-pingRequested = false;
+    ioports = (cowpi_ioport_t *)(0x23);
+    i2c = (cowpi_i2c_t *)(0xB8);
+}
+bool right_switch_is_in_right_position(void) {
+
+   bool switch_in_position = (ioports[D8_D13].input & (1 << 2));
+    return cowpi_debounce_byte(switch_in_position, RIGHT_SWITCH_RIGHT);
+}
+bool left_switch_is_in_right_position(void) { //DONE
+
+    bool switch_in_position = (ioports[D8_D13].input & (1 << 3));
+    return cowpi_debounce_byte(switch_in_position, LEFT_SWITCH_RIGHT);
+}
+bool left_switch_is_in_left_position(void) { //DONE
+    return !left_switch_is_in_right_position();
+}
+bool right_switch_is_in_left_position(void) { //DONE
+    return !right_switch_is_in_right_position();
 }
 
 void manage_controls(void) 
 {
-  bool switch1State = debounceRead(10);
-  bool switch2State = debounceRead(11);
-
-  // if (switch1State == LOW && switch2State == LOW) 
-  // {
-  //   currentMode = NORMAL;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == HIGH && switch2State == LOW) 
-  // {
-  //   currentMode = SINGLE_PULSE;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == HIGH && switch2State == HIGH) 
-  // {
-  //   currentMode = THRESHOLD_ADJUSTMENT;
-  //     //  manage_alarm();
-  // } 
-  // else if (switch1State == LOW && switch2State == HIGH) 
-  // {
-  //   currentMode = CONTINUOUS_TONE;
-
-  //  // manage_alarm();
-  // }
-
-  // if (currentMode == SINGLE_PULSE && digitalRead(pushButtonPin) == HIGH)
-  // {
-  //     pingRequested = true;
-  // }
-
-currentMode = SINGLE_PULSE;
+  if(right_switch_is_in_left_position() == true && left_switch_is_in_left_position() == true ){ 
+currentMode = NORMAL;
 
 }
+  if(right_switch_is_in_left_position() == false && left_switch_is_in_left_position() == false ){ 
+currentMode = THRESHOLD_ADJUSTMENT;
+
+}
+  if(right_switch_is_in_left_position() == false && left_switch_is_in_left_position() == true ){ 
+currentMode = CONTINUOUS_TONE;
+
+}
+  if(right_switch_is_in_left_position() == false && left_switch_is_in_left_position() == true ){ 
+currentMode = SINGLE_PULSE;
+
+
+}
+}
+
