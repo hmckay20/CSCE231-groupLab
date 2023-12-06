@@ -60,7 +60,7 @@ void manage_controls(void)
   bool switch1State = debounceRead(11);
   bool switch2State = debounceRead(12);
 
-  if (cowpi_left_button_is_pressed())
+  if (cowpi_left_button_is_pressed() && (currentMode == SINGLE_PULSE))
   {
     pingRequested = true;
   }
